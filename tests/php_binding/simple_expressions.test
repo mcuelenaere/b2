@@ -1,0 +1,82 @@
+--TEMPLATE--
+Binary operations:
+{{ a }} + {{ b }}: {{ a + b }}
+{{ a }} - {{ b }}: {{ a - b }}
+{{ a }} * {{ b }}: {{ a * b }}
+{{ a }} / {{ b }}: {{ a / b }}
+{{ a }} % {{ b }}: {{ a % b }}
+
+Unary operations:
+!{{ a }}: {{ !a }}
++{{ b }}: {{ +b }}
+-{{ b }}: {{ -b }}
+
+Comparison operations:
+{{ a }} == {{ b }}: {{ a == b }}
+{{ a }} != {{ b }}: {{ a != b }}
+{{ a }} >  {{ b }}: {{ a > b }}
+{{ a }} <  {{ b }}: {{ a < b }}
+{{ a }} >= {{ b }}: {{ a >= b }}
+{{ a }} <= {{ b }}: {{ a <= b }}
+{{ a }} && {{ b }}: {{ a && b }}
+{{ a }} || {{ b }}: {{ a || b }}
+
+--FILE[main.php]--
+<?php
+$engine = new \b2\Engine(__DIR__);
+$template = $engine->parseTemplate("main.tpl");
+
+$template->display([
+	'a' => 3,
+	'b' => 4,
+]);
+
+$template->display([
+	'a' => false,
+	'b' => true,
+]);
+--EXPECTED--
+Binary operations:
+3 + 4: 7
+3 - 4: -1
+3 * 4: 12
+3 / 4: 0.75
+3 % 4: 3
+
+Unary operations:
+!3: 
++4: 4
+-4: -4
+
+Comparison operations:
+3 == 4: 
+3 != 4: 1
+3 >  4: 
+3 <  4: 1
+3 >= 4: 
+3 <= 4: 1
+3 && 4: 1
+1 || 1: 1
+
+Binary operations:
+ + 1: 1
+ - 1: -1
+ * 1: 0
+ / 1: 0
+ % 1: 0
+
+Unary operations:
+!: 1
++1: 1
+-1: -1
+
+Comparison operations:
+ == 1: 
+ != 1: 1
+ >  1: 
+ <  1: 1
+ >= 1: 
+ <= 1: 1
+ && 1: 
+ || 1: 1
+

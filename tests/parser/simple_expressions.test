@@ -1,0 +1,87 @@
+--ARGUMENTS--
+	--disable-all-passes --enable-raw-block-coalescing-pass
+--TEMPLATE--
+Variable reference: {{ foo }} {{ foo.bar }}
+Literals: {{ "literal" }} {{ 4 }} {{ 5.0 }} {{ .1 }} {{ 3e4 }} {{ 4E3 }} {{ TRUE }} {{ FALSE }} {{ true }} {{ false }}
+Unary numerical operations: {{ -42 }} {{ +4.2 }}
+Unary boolean operations: {{ !true }} {{ not false }} {{ NOT true }}
+Binary numerical operations: {{ 3 - 5 }} {{ 6 * 12 }} {{ 2 + 1 }} {{ 2 / 1 }} {{ 2 % 1 }}
+Binary comparison operations: {{ true == false }} {{ true != true }} {{ 4 > 2 }} {{ 1 < 2}} {{ 2 >= 3}} {{ 3 <= 2 }} {{ true && false }} {{ true || false }} {{ false and true }} {{ false or true }}
+Parentheses: {{ (4 + 2) * 3 }}
+Method call: {{ strlen("literal") }} {{ method("arg1", 2, "arg3") }}
+--EXPECTED--
+[SOF]
+	[STATEMENTS]
+		[RAW] "Variable reference: "
+		[PRINT_BLOCK {VARIABLE name="foo"}]
+		[RAW] " "
+		[PRINT_BLOCK {GET_ATTRIBUTE variable={VARIABLE name="foo"} attributeName="bar"}]
+		[RAW] "\nLiterals: "
+		[PRINT_BLOCK {STRING value="literal"}]
+		[RAW] " "
+		[PRINT_BLOCK {INT value=4}]
+		[RAW] " "
+		[PRINT_BLOCK {DOUBLE value=5}]
+		[RAW] " "
+		[PRINT_BLOCK {DOUBLE value=0.1}]
+		[RAW] " "
+		[PRINT_BLOCK {DOUBLE value=30000}]
+		[RAW] " "
+		[PRINT_BLOCK {DOUBLE value=4000}]
+		[RAW] " "
+		[PRINT_BLOCK {BOOL value=true}]
+		[RAW] " "
+		[PRINT_BLOCK {BOOL value=false}]
+		[RAW] " "
+		[PRINT_BLOCK {BOOL value=true}]
+		[RAW] " "
+		[PRINT_BLOCK {BOOL value=false}]
+		[RAW] "\nUnary numerical operations: "
+		[PRINT_BLOCK {UNOP expr={INT value=42} op='-'}]
+		[RAW] " "
+		[PRINT_BLOCK {UNOP expr={DOUBLE value=4.2} op='+'}]
+		[RAW] "\nUnary boolean operations: "
+		[PRINT_BLOCK {UNOP expr={BOOL value=true} op='!'}]
+		[RAW] " "
+		[PRINT_BLOCK {UNOP expr={BOOL value=false} op='!'}]
+		[RAW] " "
+		[PRINT_BLOCK {UNOP expr={BOOL value=true} op='!'}]
+		[RAW] "\nBinary numerical operations: "
+		[PRINT_BLOCK {BINOP left={INT value=3} right={INT value=5} op='-'}]
+		[RAW] " "
+		[PRINT_BLOCK {BINOP left={INT value=6} right={INT value=12} op='*'}]
+		[RAW] " "
+		[PRINT_BLOCK {BINOP left={INT value=2} right={INT value=1} op='+'}]
+		[RAW] " "
+		[PRINT_BLOCK {BINOP left={INT value=2} right={INT value=1} op='/'}]
+		[RAW] " "
+		[PRINT_BLOCK {BINOP left={INT value=2} right={INT value=1} op='%'}]
+		[RAW] "\nBinary comparison operations: "
+		[PRINT_BLOCK {CMP left={BOOL value=true} right={BOOL value=false} op="=="}]
+		[RAW] " "
+		[PRINT_BLOCK {CMP left={BOOL value=true} right={BOOL value=true} op="!="}]
+		[RAW] " "
+		[PRINT_BLOCK {CMP left={INT value=4} right={INT value=2} op=">"}]
+		[RAW] " "
+		[PRINT_BLOCK {CMP left={INT value=1} right={INT value=2} op="<"}]
+		[RAW] " "
+		[PRINT_BLOCK {CMP left={INT value=2} right={INT value=3} op=">="}]
+		[RAW] " "
+		[PRINT_BLOCK {CMP left={INT value=3} right={INT value=2} op="<="}]
+		[RAW] " "
+		[PRINT_BLOCK {CMP left={BOOL value=true} right={BOOL value=false} op="&&"}]
+		[RAW] " "
+		[PRINT_BLOCK {CMP left={BOOL value=true} right={BOOL value=false} op="||"}]
+		[RAW] " "
+		[PRINT_BLOCK {CMP left={BOOL value=false} right={BOOL value=true} op="&&"}]
+		[RAW] " "
+		[PRINT_BLOCK {CMP left={BOOL value=false} right={BOOL value=true} op="||"}]
+		[RAW] "\nParentheses: "
+		[PRINT_BLOCK {BINOP left={BINOP left={INT value=4} right={INT value=2} op='+'} right={INT value=3} op='*'}]
+		[RAW] "\nMethod call: "
+		[PRINT_BLOCK {METHOD_CALL name="strlen", args=[{STRING value="literal"}]}]
+		[RAW] " "
+		[PRINT_BLOCK {METHOD_CALL name="method", args=[{STRING value="arg1"}, {INT value=2}, {STRING value="arg3"}]}]
+		[RAW] "\n"
+	[END_STATEMENTS]
+[EOF]

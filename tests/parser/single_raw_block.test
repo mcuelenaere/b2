@@ -1,0 +1,8 @@
+--ARGUMENTS--
+	--disable-all-passes --enable-raw-block-coalescing-pass
+--TEMPLATE--
+Hello, this is a test!
+--EXPECTED--
+[SOF]
+	[RAW] "Hello, this is a test!\n"
+[EOF]

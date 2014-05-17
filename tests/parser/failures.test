@@ -1,0 +1,8 @@
+--ARGUMENTS--
+	--disable-all-passes --enable-raw-block-coalescing-pass
+--TEMPLATE--
+{{ .0 }} {{ 1. }} {{ 6 % 0 }} {{ 5 / 0 }} {% include "non-existing.txt" %} {# test non-existing variable in include scope #}
+--EXPECTED--
+[SOF]
+	[RAW] "Hello, this is a test!"
+[EOF]

@@ -1,0 +1,30 @@
+--TEMPLATE--
+Hi, this is {{ my_name }}!
+
+My friends:
+{% for friend in friends %-}
+	{% include "friend.tpl" using friend %}
+{-% endfor %}
+--FILE[friend.tpl]--
+	- {{ name }} (age: {{ age }})
+--FILE[main.php]--
+<?php
+$engine = new \b2\Engine(__DIR__);
+$template = $engine->parseTemplate("main.tpl");
+
+$template->display([
+	'my_name' => 'foo',
+	'friends' => [
+		['name' => 'A', 'age' => 10],
+		['name' => 'B', 'age' => 100],
+		['name' => 'C', 'age' => 1000],
+	]
+]);
+--EXPECTED--
+Hi, this is bar!
+
+My friends:
+	- A (age: 10)
+	- B (age: 100)
+	- C (age: 1000)
+

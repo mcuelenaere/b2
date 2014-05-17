@@ -1,0 +1,20 @@
+--ARGUMENTS--
+	--disable-all-passes --enable-raw-block-coalescing-pass --enable-literal-print-to-raw-conversion-pass --enable-resolve-includes-pass
+--TEMPLATE--
+Foo: {% include "foo.txt" using foo_scope %}
+Bar: {% include "bar.txt" with name="bar", verb="speaking" %}
+--FILE[foo.txt]--
+Hi, I'm {{ name }}!
+{% include "bar.txt" with name="foo", verb %}
+--FILE[bar.txt]--
+This is {{ name }} {{ verb }}!
+--EXPECTED--
+[SOF]
+	[STATEMENTS]
+		[RAW] "Foo: Hi, I'm "
+		[PRINT_BLOCK {GET_ATTRIBUTE variable={VARIABLE name="foo_scope"} attributeName="name"}]
+		[RAW] "!\nThis is foo "
+		[PRINT_BLOCK {GET_ATTRIBUTE variable={VARIABLE name="foo_scope"} attributeName="verb"}]
+		[RAW] "!\n\n\nBar: This is bar speaking!\n\n"
+	[END_STATEMENTS]
+[EOF]

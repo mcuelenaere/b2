@@ -1,0 +1,34 @@
+--ARGUMENTS--
+	--disable-all-passes --enable-raw-block-coalescing-pass --enable-constant-folding-pass
+--TEMPLATE--
+{{ !true }} {{ ! not false }} {{ not not not true }}
+{{ 3 - 5 }} {{ 6 * 12 + 14 - 3 / 5 + -1 }} {{ (5.5 - 2) * 3 }}
+{{ true == false }} {{ true != true }} {{ (2 < 1) && (3 < 1) }}
+{{ (2 + 3) == 5 }} {{ (true or true) and !false }}
+--EXPECTED--
+[SOF]
+	[STATEMENTS]
+		[PRINT_BLOCK {BOOL value=false}]
+		[RAW] " "
+		[PRINT_BLOCK {BOOL value=false}]
+		[RAW] " "
+		[PRINT_BLOCK {BOOL value=false}]
+		[RAW] "\n"
+		[PRINT_BLOCK {INT value=-2}]
+		[RAW] " "
+		[PRINT_BLOCK {INT value=85}]
+		[RAW] " "
+		[PRINT_BLOCK {DOUBLE value=10.5}]
+		[RAW] "\n"
+		[PRINT_BLOCK {BOOL value=false}]
+		[RAW] " "
+		[PRINT_BLOCK {BOOL value=false}]
+		[RAW] " "
+		[PRINT_BLOCK {BOOL value=false}]
+		[RAW] "\n"
+		[PRINT_BLOCK {BOOL value=true}]
+		[RAW] " "
+		[PRINT_BLOCK {BOOL value=true}]
+		[RAW] "\n"
+	[END_STATEMENTS]
+[EOF]

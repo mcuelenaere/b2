@@ -1,0 +1,55 @@
+--TEMPLATE--
+{% for name, person in people %-}
+	{{ name }} is {{ person.age }} years old.
+
+	{% if name == "bar" %-}
+		name is bar
+	{-% elseif name == "foo" %-}
+		name is foo
+	{-% else %-}
+		name isn't foo nor bar!
+	{-% endif %}
+{% else %-}
+	No people!
+{% endfor %}
+--FILE[main.php]--
+<?php
+$engine = new \b2\Engine(__DIR__);
+$template = $engine->parseTemplate("main.tpl");
+
+$template->display([
+	'people' => [
+		'foo' => ['age' => 10],
+		'bar' => ['age' => 105],
+		'foobar' => ['age' => -10],
+	]
+]);
+
+echo "===\n";
+
+$template->display([
+	'people' => []
+]);
+
+echo "===\n";
+
+$template->display([
+]);
+
+--EXPECTED--
+foo is 10 years old.
+
+	name is foo
+bar is 105 years old.
+
+	name is bar
+foobar is -10 years old.
+
+	name isn't foo nor bar!
+
+===
+No people!
+
+===
+No people!
+

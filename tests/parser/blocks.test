@@ -1,0 +1,58 @@
+--ARGUMENTS--
+	--enable-all-passes --disable-resolve-includes-pass
+--TEMPLATE--
+{% for name, person in people %-}
+	{{ name }} is {{ person.age }} years old.
+{% else %-}
+	No people!
+{% endfor %}
+
+{% if foo == "bar" %-}
+	bar
+{% else if foo == "foo" %-}
+	foo
+{% elseif foo == "foobar" %-}
+	foobar
+{% else %-}
+	no foo!
+{% endif %}
+
+{% include "foo" %}
+{% include "foo" with foo="bar", bar="foo", foobar %}
+{% include "foo" using foo %}
+--EXPECTED--
+[SOF]
+	[STATEMENTS]
+		[FOR_BLOCK keyVariable={VARIABLE name="name"} valueVariable={VARIABLE name="person"} iterable={VARIABLE name="people"}]
+			[STATEMENTS]
+				[PRINT_BLOCK {VARIABLE name="name"}]
+				[RAW] " is "
+				[PRINT_BLOCK {GET_ATTRIBUTE variable={VARIABLE name="person"} attributeName="age"}]
+				[RAW] " years old.\n"
+			[END_STATEMENTS]
+		[ELSEFOR_BLOCK]
+			[RAW] "No people!\n"
+		[ENDFOR_BLOCK]
+		[RAW] "\n\n"
+		[IF_BLOCK {CMP left={VARIABLE name="foo"} right={STRING value="bar"} op="=="}]
+			[RAW] "bar\n"
+		[ELSE_BLOCK]
+			[IF_BLOCK {CMP left={VARIABLE name="foo"} right={STRING value="foo"} op="=="}]
+				[RAW] "foo\n"
+			[ELSE_BLOCK]
+				[IF_BLOCK {CMP left={VARIABLE name="foo"} right={STRING value="foobar"} op="=="}]
+					[RAW] "foobar\n"
+				[ELSE_BLOCK]
+					[RAW] "no foo!\n"
+				[ENDIF_BLOCK]
+			[ENDIF_BLOCK]
+		[ENDIF_BLOCK]
+		[RAW] "\n\n"
+		[INCLUDE_BLOCK includeName="foo"]
+		[RAW] "\n"
+		[INCLUDE_BLOCK includeName="foo" variableMapping={"foobar => {VARIABLE name="foobar"}, "bar => {STRING value="foo"}, "foo => {STRING value="bar"}}]
+		[RAW] "\n"
+		[INCLUDE_BLOCK includeName="foo" scope={VARIABLE name="foo"}]
+		[RAW] "\n"
+	[END_STATEMENTS]
+[EOF]

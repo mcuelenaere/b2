@@ -1,0 +1,23 @@
+--ARGUMENTS--
+	--enable-undefined-check
+--TEMPLATE--
+{{ foo }}
+{{ bar('foo') }}
+{{ bar(foo) }}
+{{ foo.bar }}
+--EXPECTED--
+function(helpers, data) {
+	data = data || {};
+	var buffer = '';
+
+	buffer += data['foo'] || '';
+	buffer += '\n';
+	buffer += helpers['bar']('foo') || '';
+	buffer += '\n';
+	buffer += helpers['bar'](data['foo']) || '';
+	buffer += '\n';
+	buffer += data['foo']['bar'] || '';
+	buffer += '\n';
+
+	return buffer;
+}

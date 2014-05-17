@@ -1,0 +1,9 @@
+--ARGUMENTS--
+	--disable-all-passes --enable-literal-print-to-raw-conversion-pass --enable-raw-block-coalescing-pass
+--TEMPLATE--
+{{ "hi" }}, this is {{ 4 }} and that is {{ true }}!
+{{ 5.2 }} + {{ 10 }} = {{ 15.2 }}
+--EXPECTED--
+[SOF]
+	[RAW] "hi, this is 4 and that is true!\n5.2 + 10 = 15.2\n"
+[EOF]

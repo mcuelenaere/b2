@@ -1,0 +1,95 @@
+--TEMPLATE--
+{% for name, person in people %-}
+	{{ name }} is {{ person.age }} years old.
+{% else %-}
+	No people!
+{% endfor %}
+
+{{ foo }}
+{% for foo in bar %}
+	{{ foo }}
+	{% for foo in foo %}
+		{{ foo }}
+	{% endfor %}
+	{{ foo }}
+{% endfor %}
+{{ foo }}
+
+{% if foo == "bar" %-}
+	bar
+{% else if foo == "foo" %-}
+	foo
+{% elseif foo('bar') == "foobar" %-}
+	foobar
+{% else %-}
+	no foo!
+{% endif %}
+--EXPECTED--
+function(helpers, data) {
+	data = data || {};
+	var buffer = '';
+
+
+	var iterable_1 = data['people'];
+	var is_empty_1 = true;
+	for (var key_1 in iterable_1) {
+		if (!iterable_1.hasOwnProperty(key_1)) continue;
+		var value_1 = iterable_1[key_1];
+
+		buffer += key_1;
+		buffer += ' is ';
+		buffer += value_1['age'];
+		buffer += ' years old.\n';
+		is_empty_1 = false;
+	}
+
+	if (is_empty_1) {
+		buffer += 'No people!\n';
+	}
+
+	buffer += '\n\n';
+	buffer += data['foo'];
+	buffer += '\n';
+
+	var iterable_2 = data['bar'];
+	for (var key_2 in iterable_2) {
+		if (!iterable_2.hasOwnProperty(key_2)) continue;
+		var value_2 = iterable_2[key_2];
+
+		buffer += '\n\t';
+		buffer += value_2;
+		buffer += '\n\t';
+
+		var iterable_3 = value_2;
+		for (var key_3 in iterable_3) {
+			if (!iterable_3.hasOwnProperty(key_3)) continue;
+			var value_3 = iterable_3[key_3];
+
+			buffer += '\n\t\t';
+			buffer += value_3;
+			buffer += '\n\t';
+		}
+
+		buffer += '\n\t';
+		buffer += value_2;
+		buffer += '\n';
+	}
+
+	buffer += '\n';
+	buffer += data['foo'];
+	buffer += '\n\n';
+
+	if (data['foo'] == 'bar') {
+		buffer += 'bar\n';
+	} else if (data['foo'] == 'foo') {
+		buffer += 'foo\n';
+	} else if (helpers['foo']('bar') == 'foobar') {
+		buffer += 'foobar\n';
+	} else {
+		buffer += 'no foo!\n';
+	}
+
+	buffer += '\n';
+
+	return buffer;
+}

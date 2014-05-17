@@ -1,0 +1,30 @@
+--ARGUMENTS--
+	--enable-all-passes --disable-resolve-includes-pass
+--TEMPLATE--
+{# this is a comment! #}
+
+{% if true %-}
+	whitespace within this block has been eaten!
+{-% endif %}
+
+	{# more whitespace #}
+
+{-% if true %-}
+	all whitespace is gone here!
+{-% endif %-}
+
+	{# and some more #}
+
+--EXPECTED--
+[SOF]
+	[STATEMENTS]
+		[RAW] "\n\n"
+		[IF_BLOCK {BOOL value=true}]
+			[RAW] "whitespace within this block has been eaten!"
+		[ENDIF_BLOCK]
+		[IF_BLOCK {BOOL value=true}]
+			[RAW] "all whitespace is gone here!"
+		[ENDIF_BLOCK]
+		[RAW] "\n\n"
+	[END_STATEMENTS]
+[EOF]
