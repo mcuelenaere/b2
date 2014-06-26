@@ -1,0 +1,22 @@
+language: cpp
+compiler:
+ - clang
+
+before_install:
+ - sudo add-apt-repository "deb mirror://mirrors.ubuntu.com/mirrors.txt trusty main restricted universe multiverse" -y
+ - sudo apt-get update -q
+
+install:
+ - sudo apt-get install -y cmake llvm llvm-dev php5-cli php5-dev bison flex
+
+before_script:
+ - mkdir build && cd build
+ - cmake ..
+ - make
+
+script:
+ - ../tests/runner.py .
+
+os:
+ - linux
+# - osx
