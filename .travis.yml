@@ -3,20 +3,17 @@ compiler:
  - clang
 
 before_install:
- - sudo add-apt-repository "deb mirror://mirrors.ubuntu.com/mirrors.txt trusty main restricted universe multiverse" -y
- - sudo apt-get update -q
+ - ./.travis.helper.sh before_install
 
 install:
- - sudo apt-get install -y cmake llvm llvm-dev php5-cli php5-dev bison flex
+ - ./.travis.helper.sh install
 
 before_script:
- - mkdir build && cd build
- - cmake ..
- - make
+ - ./.travis.helper.sh before_script
 
 script:
- - ../tests/runner.py .
+ - ./tests/runner.py build/
 
 os:
  - linux
-# - osx
+ - osx
