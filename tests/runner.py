@@ -133,6 +133,9 @@ class PHPBindingTestCase(AbstractTestCase):
                     , stderr=STDOUT
                 )
             except CalledProcessError as e:
+                if e.returncode == 123 and e.output.strip().startswith("SKIP_TEST"):
+                    self.skipTest(e.output.strip().replace("SKIP_TEST: ", ""))
+
                 assert_msg = "Command %s returned exit status %d, expected %d. Output: %s" % (e.cmd, e.returncode, self.parts['EXPECTED_RETCODE'], e.output)
                 self.assertEqual(self.parts['EXPECTED_RETCODE'], e.returncode, msg=assert_msg)
 
