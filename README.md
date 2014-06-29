@@ -7,9 +7,8 @@ b² is a [jinja](http://jinja.pocoo.org/)-inspired template engine which uses [L
 ### Mac OS X
 
 Requirements:
- - `brew install cmake`
- - `brew install llvm`
- - `brew install bison`
+ - `brew install cmake llvm bison`
+ - `brew install php55` (for PHP bindings)
 
 Build steps:
 
@@ -23,10 +22,15 @@ make install
 ### Linux
 
 Requirements:
- - `aptitude install cmake`
- - `aptitude install llvm`
+ - `apt-get install bison cmake flex llvm-dev`
+ - `apt-get install php5-dev` (for PHP bindings)
 
-TODO
+```bash
+mkdir build && cd build
+cmake ..
+make
+make install
+```
 
 ## Running tests
 
