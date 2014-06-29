@@ -2,6 +2,7 @@
 #include "backends/llvm/llvm_bindings.h"
 #include "backends/llvm/llvm_visitor.hpp"
 
+#include <mutex>
 #include <unordered_map>
 #include <vector>
 
@@ -22,6 +23,8 @@
 
 using namespace b2;
 
+static std::once_flag llvmInitialized;
+
 LLVMBackend::LLVMBackend(llvm::IRBuilder<> &irBuilder, LLVMBindings &bindings) :
 	m_irBuilder(irBuilder),
 	m_bindings(bindings),
@@ -33,11 +36,14 @@ LLVMBackend::LLVMBackend(llvm::IRBuilder<> &irBuilder, LLVMBindings &bindings) :
 
 	// create visitor
 	m_visitor.reset(new LLVMVisitor(m_irBuilder, m_module, m_bindings));
-	
+
 	// setup execution engine preconditions
-	llvm::InitializeNativeTarget();
-	llvm::InitializeNativeTargetAsmPrinter();
-	
+	std::call_once(llvmInitialized, []() {
+		LLVMLinkInJIT();
+		llvm::InitializeNativeTarget();
+		llvm::InitializeNativeTargetAsmPrinter();
+	});
+
 	llvm::TargetOptions targetOptions;
 	targetOptions.JITEmitDebugInfo = true;
 	targetOptions.NoFramePointerElim = true;
