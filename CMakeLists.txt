@@ -10,6 +10,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	add_definitions(-fPIC)
 endif()
 
+option(WITH_PHP_BINDINGS "Enable PHP bindings" ON)
+
 add_subdirectory(tools)
 add_subdirectory(lib)
 add_subdirectory(src)

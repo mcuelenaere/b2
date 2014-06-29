@@ -4,6 +4,10 @@ b² is a [jinja](http://jinja.pocoo.org/)-inspired template engine which uses [L
 
 ## Building the code
 
+### CMake options
+
+ - `-DWITH_PHP_BINDINGS=OFF` disable PHP bindings (enabled by default)
+
 ### Mac OS X
 
 Requirements:
@@ -71,7 +75,9 @@ class B2 < Formula
     ] + std_cmake_args
 
     if build.with? 'php-bindings'
-      args << "-DPHP_CONFIG_EXECUTABLE=#{Formula['php55'].opt_prefix}/bin/php-config"
+      args << "-DWITH_PHP_BINDINGS=ON -DPHP_CONFIG_EXECUTABLE=#{Formula['php55'].opt_prefix}/bin/php-config"
+    else
+      args << "-DWITH_PHP_BINDINGS=OFF"
     end
 
     mkdir "build"
