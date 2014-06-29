@@ -186,12 +186,13 @@ void PHPBindings::createForLoopGetVariables(llvm::Value* iterable, llvm::Value**
     if (keyVariablePtr) {
         *keyVariablePtr = m_irBuilder.CreateLoad(keyVariable);
         // key should be destroyed when it goes out of scope
+		m_variablesRefCount[*keyVariablePtr] = 1;
     }
 
     if (valueVariablePtr) {
         *valueVariablePtr = m_irBuilder.CreateLoad(valueVariable);
         // value should _not_ be destroyed when it goes out of scope
-        m_variablesNotToBeDestroyed.insert(*valueVariablePtr);
+		m_variablesRefCount[*valueVariablePtr] = -1;
     }
 }
 
@@ -252,6 +253,9 @@ Value* PHPBindings::createVariantBinaryOperation(BinaryOperation op, Value* left
 
     auto value = m_irBuilder.CreateLoad(ptrToResult);
 
+	// init variable refcount
+	m_variablesRefCount[value] = 1;
+
     // destroy variants, if refcount == 1
     variableGoesOutOfScope(left);
     variableGoesOutOfScope(right);
@@ -279,7 +283,10 @@ Value* PHPBindings::createVariantUnaryOperation(UnaryOperation op, Value *val)
     createRetVoidIfCallFails(callResult);
 	
     auto value = m_irBuilder.CreateLoad(ptrToResult);
-	
+
+	// init variable refcount
+	m_variablesRefCount[value] = 1;
+
     // destroy variants, if refcount == 1
     variableGoesOutOfScope(val);
 
@@ -298,7 +305,7 @@ Value* PHPBindings::createVariableLookup(const char* variableName)
     auto value = m_irBuilder.CreateCall(findFunction("get_value_from_hashtable"), lookupVariableArgs);
 
     // tag this variable as not-to-be-destroyed
-    m_variablesNotToBeDestroyed.insert(value);
+	m_variablesRefCount[value] = -1;
 
     return value;
 }
@@ -350,7 +357,10 @@ llvm::Value* PHPBindings::createGetAttribute(const char* attribute, llvm::Value*
     auto value = m_irBuilder.CreateCall(findFunction("get_attribute"), getAttributeArgs);
 
     // tag this variable as not-to-be-destroyed
-    m_variablesNotToBeDestroyed.insert(value);
+	m_variablesRefCount[value] = -1;
+
+	// destroy parent variable, if it has refcount==1
+	variableGoesOutOfScope(variable);
 
     return value;
 }
@@ -393,28 +403,43 @@ Value* PHPBindings::wrapAsVariant(Value *value)
     m_irBuilder.CreateCall(wrappingFunction, args);
 
     // tag zval as not-to-be-destroyed
-    m_variablesNotToBeDestroyed.insert(zval);
+	m_variablesRefCount[zval] = -1;
 
     return zval;
 }
 
 void PHPBindings::variableGoesOutOfScope(Value* value)
 {
+	auto it = m_variablesRefCount.find(value);
+
+	if (it == m_variablesRefCount.end()) {
+		throw std::runtime_error("Variable found without refcount!");
+	}
+
     // check if we need to skip the destruction of this variable
-    auto variableToBeDestroyed = m_variablesNotToBeDestroyed.find(value);
-    if (variableToBeDestroyed != m_variablesNotToBeDestroyed.end()) {
+    if (it->second == -1) {
         return;
     }
 
-    Value* args[] = {
-        /*value*/ value,
-    };
-    m_irBuilder.CreateCall(findFunction("destruct_zval"), args);
+	if (--it->second == 0) {
+		Value* args[] = {
+			/*value*/ value,
+		};
+		m_irBuilder.CreateCall(findFunction("destruct_zval"), args);
+	}
 }
 
 Value* PHPBindings::getNewReferenceForVariable(Value *value)
 {
-    m_variablesNotToBeDestroyed.insert(value);
+	auto it = m_variablesRefCount.find(value);
+
+	if (it == m_variablesRefCount.end()) {
+		throw std::runtime_error("Variable found without refcount!");
+	}
+
+	if (it->second != -1) {
+		it->second++;
+	}
 
     return value;
 }

@@ -9,7 +9,6 @@
 
 #include <memory>
 #include <unordered_map>
-#include <unordered_set>
 
 namespace b2 {
 
@@ -33,7 +32,7 @@ public:
         m_irBuilder.CreateRetVoid();
 
         // reset internal state
-        m_variablesNotToBeDestroyed.clear();
+		m_variablesRefCount.clear();
     }
 
     virtual llvm::FunctionType* getTemplateFunctionType(llvm::Module* module) override;
@@ -72,7 +71,7 @@ private:
 	std::unique_ptr<llvm::Module> m_module;
 
     std::unordered_map<llvm::Value*,ForLoopMetadata> m_forLoopMetadata;
-    std::unordered_set<llvm::Value*> m_variablesNotToBeDestroyed;
+	std::unordered_map<llvm::Value*,int> m_variablesRefCount;
 };
 
 } // namespace b2
