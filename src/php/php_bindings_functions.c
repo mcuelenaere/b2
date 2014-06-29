@@ -18,14 +18,17 @@ static void add_to_buffer(struct template_buffer* buffer, zval* str)
 {
     int str_len = Z_STRLEN_P(str);
 
-    if (buffer->str_length + str_len > buffer->allocated_length) {
-        size_t new_length = buffer->allocated_length + (str_len > BUFFER_CHUNK_SIZE ? str_len : BUFFER_CHUNK_SIZE);
+    if (buffer->str_length + str_len + 1 > buffer->allocated_length) {
+        size_t new_length = buffer->allocated_length + (str_len + 1 > BUFFER_CHUNK_SIZE ? str_len + 1 : BUFFER_CHUNK_SIZE);
         buffer->ptr = erealloc(buffer->ptr, new_length);
         buffer->allocated_length = new_length;
     }
 
     memcpy(&buffer->ptr[buffer->str_length], Z_STRVAL_P(str), str_len);
     buffer->str_length += str_len;
+
+	// NULL-terminate string
+	buffer->ptr[buffer->str_length] = 0;
 }
 
 ALWAYS_INLINE void print_double(double v, struct template_buffer* buffer)
