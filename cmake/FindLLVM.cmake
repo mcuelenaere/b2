@@ -39,16 +39,16 @@ if(LLVM_CONFIG_EXECUTABLE)
         set(LLVM_LIBS ${LLVM_CONFIG_libs_output})
     endif()
 
-    execute_process(COMMAND ${LLVM_CONFIG_EXECUTABLE} --libdir ${COMPONENTS}
-        RESULT_VARIABLE LLVM_CONFIG_libdir_result
-        OUTPUT_VARIABLE LLVM_CONFIG_libdir_output
-        ERROR_VARIABLE LLVM_CONFIG_libdir_error
+    execute_process(COMMAND ${LLVM_CONFIG_EXECUTABLE} --ldflags
+        RESULT_VARIABLE LLVM_CONFIG_ldflags_result
+        OUTPUT_VARIABLE LLVM_CONFIG_ldflags_output
+        ERROR_VARIABLE LLVM_CONFIG_ldflags_error
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    if(NOT ${LLVM_CONFIG_libdir_result} EQUAL 0)
-        message(SEND_ERROR "Command \"${LLVM_CONFIG_EXECUTABLE} --libdir\" failed with output: ${LLVM_CONFIG_libdir_error}")
+    if(NOT ${LLVM_CONFIG_ldflags_result} EQUAL 0)
+        message(SEND_ERROR "Command \"${LLVM_CONFIG_EXECUTABLE} --ldflags\" failed with output: ${LLVM_CONFIG_ldflags_error}")
     else()
-        set(LLVM_LIBS "-L${LLVM_CONFIG_libdir_output} ${LLVM_LIBS}")
+        set(LLVM_LIBS "${LLVM_CONFIG_ldflags_output} ${LLVM_LIBS}")
     endif()
 
     execute_process(COMMAND ${LLVM_CONFIG_EXECUTABLE} --bindir ${COMPONENTS}
