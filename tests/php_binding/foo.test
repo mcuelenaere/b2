@@ -21,7 +21,7 @@ $template->display([
 	]
 ]);
 --EXPECTED--
-Hi, this is bar!
+Hi, this is foo!
 
 My friends:
 	- A (age: 10)
