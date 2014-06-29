@@ -170,7 +170,7 @@ static PHP_METHOD(Engine, parseTemplate)
 
     // add engine reference to template
     zend_update_property(b2_template_class_entry, return_value, "engine", strlen("engine"), getThis());
-    Z_ADDREF_P(getThis());
+	// zend_update_property() will increase the refcount
 }
 
 static PHP_METHOD(Engine, addFunction)

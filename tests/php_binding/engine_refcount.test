@@ -1,0 +1,19 @@
+--TEMPLATE--
+foo
+--FILE[main.php]--
+<?php
+if (!function_exists('xdebug_debug_zval')) {
+	echo "SKIP_TEST: No xdebug_debug_zval function present";
+	exit(123);
+}
+
+$engine = new \b2\Engine(__DIR__);
+xdebug_debug_zval('engine');
+
+$template = $engine->parseTemplate("main.tpl");
+xdebug_debug_zval('template');
+xdebug_debug_zval('engine');
+--EXPECTED--
+engine: (refcount=1, is_ref=0)=class b2\Engine {  }
+template: (refcount=1, is_ref=0)=class b2\Template { private $engine = (refcount=2, is_ref=0)=class b2\Engine {  } }
+engine: (refcount=2, is_ref=0)=class b2\Engine {  }
