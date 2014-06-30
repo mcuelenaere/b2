@@ -91,10 +91,14 @@ Expression* FoldConstantExpressionsPass::process_node(BinaryOperationExpression 
             case Multiplication:
                 return new IntegerLiteralExpression(leftValue * rightValue);
             case Division:
-                // TODO: check for 0 values
+				if (rightValue == 0) {
+					throw std::runtime_error("Division by zero");
+				}
                 return new IntegerLiteralExpression(leftValue / rightValue);
             case Modulus:
-                // TODO: check for 0 values
+				if (rightValue == 0) {
+					throw std::runtime_error("Modulo by zero");
+				}
                 return new IntegerLiteralExpression(leftValue % rightValue);
         }
     }

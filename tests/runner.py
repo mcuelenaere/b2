@@ -52,6 +52,8 @@ class AbstractTestCase(TestCase):
                 self.parts['FILES'][filename] = contents
             elif name == "ARGUMENTS":
                 self.parts['ARGUMENTS'] = contents.strip().split(" ")
+            elif name == "EXPECTED_RETCODE":
+                self.parts['EXPECTED_RETCODE'] = int(contents)
             else:
                 self.parts[name] = contents
 
@@ -79,17 +81,34 @@ class AbstractTestCase(TestCase):
 
         return Resource(self.parts['FILES'])
 
+    def _assert_regex(self, expected_formatted, actual):
+        regex = "^"
+        parts = re.split(r"\{\{\{\s*(.+?)\s*\}\}\}", expected_formatted)
+        for i in range(0, len(parts) - 1, 2):
+            text, regex_format = parts[i], parts[i + 1]
+
+            if len(text) > 0:
+                regex += re.escape(text)
+            regex += regex_format
+        regex += re.escape(parts[-1]) + "$"
+
+        self.assertRegexpMatches(actual, re.compile(regex, flags=re.MULTILINE))
+
     def _assert_process_output_as_expected(self, args, allowSkippingTests=True):
         try:
             result = check_output(args, stderr=STDOUT)
         except CalledProcessError as e:
             assert_msg = "Command %s returned exit status %d, expected %d. Output: %s" % (e.cmd, e.returncode, self.parts['EXPECTED_RETCODE'], e.output)
             self.assertEqual(self.parts['EXPECTED_RETCODE'], e.returncode, msg=assert_msg)
+            result = e.output
 
         if allowSkippingTests and result.strip().startswith("SKIP_TEST"):
             self.skipTest(result.strip().replace("SKIP_TEST: ", ""))
 
-        self.assertMultiLineEqual(self.parts['EXPECTED'], result)
+        if '{{{' in self.parts['EXPECTED']:
+            self._assert_regex(self.parts['EXPECTED'], result)
+        else:
+            self.assertMultiLineEqual(self.parts['EXPECTED'], result)
 
     def test(self):
         raise NotImplementedError()

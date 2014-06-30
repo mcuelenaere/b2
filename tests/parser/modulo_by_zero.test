@@ -1,0 +1,8 @@
+--ARGUMENTS--
+	--enable-all-passes
+--TEMPLATE--
+{{ 5 % 0}}
+--EXPECTED--
+Runtime error: Modulo by zero
+--EXPECTED_RETCODE--
+1

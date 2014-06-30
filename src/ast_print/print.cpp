@@ -157,7 +157,12 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-	ast.reset(optimizeAST(ast.release(), basepath));
+	try {
+		ast.reset(optimizeAST(ast.release(), basepath));
+	} catch (std::runtime_error& e) {
+		std::cerr << "Runtime error: " << e.what() << std::endl;
+		return 1;
+	}
 
     printAST(ast.get());
 

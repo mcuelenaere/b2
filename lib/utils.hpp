@@ -32,7 +32,7 @@ struct FileGuard {
         fd = fopen(filename, mode);
         if (!fd) {
             std::stringstream ss;
-            ss << "Couldn't open '" << filename << " : " << strerror(errno);
+            ss << "Couldn't open '" << filename << "': " << strerror(errno);
             throw std::runtime_error(ss.str());
         }
     }

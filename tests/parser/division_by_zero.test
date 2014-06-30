@@ -1,0 +1,8 @@
+--ARGUMENTS--
+	--enable-all-passes
+--TEMPLATE--
+{{ 5 / 0}}
+--EXPECTED--
+Runtime error: Division by zero
+--EXPECTED_RETCODE--
+1

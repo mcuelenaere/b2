@@ -1,0 +1,8 @@
+--ARGUMENTS--
+	--enable-all-passes
+--TEMPLATE--
+{% include "non-existing.txt" %}
+--EXPECTED--
+Runtime error: Couldn't open '{{{ .+? }}}/non-existing.txt': No such file or directory
+--EXPECTED_RETCODE--
+1
