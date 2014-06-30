@@ -183,8 +183,8 @@ void JavascriptVisitor::for_block(ForBlockAST *ast)
 	m_output.blankline();
 
 	// cache old values
-	auto oldKey = m_shadowValues.find(key_variable_name);
-	auto oldValue = m_shadowValues.find(value_variable_name);
+	auto oldKey = m_shadowValues.find(key_variable_name) != m_shadowValues.end() ? m_shadowValues[key_variable_name] : std::string();
+	auto oldValue = m_shadowValues.find(value_variable_name) != m_shadowValues.end() ? m_shadowValues[value_variable_name] : std::string();
 
 	// set shadow values
 	if (has_key_variable) {
@@ -199,15 +199,15 @@ void JavascriptVisitor::for_block(ForBlockAST *ast)
 
 	// restore old shadow values
 	if (has_key_variable) {
-		if (oldKey != m_shadowValues.end()) {
-			m_shadowValues[oldKey->first] = oldKey->second;
+		if (!oldKey.empty()) {
+			m_shadowValues[key_variable_name] = oldKey;
 		} else {
 			m_shadowValues.erase(key_variable_name);
 		}
 	}
 	if (has_value_variable) {
-		if (oldValue != m_shadowValues.end()) {
-			m_shadowValues[oldValue->first] = oldValue->second;
+		if (!oldValue.empty()) {
+			m_shadowValues[value_variable_name] = oldValue;
 		} else {
 			m_shadowValues.erase(value_variable_name);
 		}
