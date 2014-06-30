@@ -79,6 +79,18 @@ class AbstractTestCase(TestCase):
 
         return Resource(self.parts['FILES'])
 
+    def _assert_process_output_as_expected(self, args, allowSkippingTests=True):
+        try:
+            result = check_output(args, stderr=STDOUT)
+        except CalledProcessError as e:
+            assert_msg = "Command %s returned exit status %d, expected %d. Output: %s" % (e.cmd, e.returncode, self.parts['EXPECTED_RETCODE'], e.output)
+            self.assertEqual(self.parts['EXPECTED_RETCODE'], e.returncode, msg=assert_msg)
+
+        if allowSkippingTests and result.strip().startswith("SKIP_TEST"):
+            self.skipTest(result.strip().replace("SKIP_TEST: ", ""))
+
+        self.assertMultiLineEqual(self.parts['EXPECTED'], result)
+
     def test(self):
         raise NotImplementedError()
 
@@ -95,18 +107,7 @@ class ParserTestCase(AbstractTestCase):
         self.assertIn('main.tpl', self.parts['FILES'])
 
         with self._setup_tempdir_and_extract_files() as temp_dir:
-            try:
-                result = check_output(
-                    [self.ast_print, "-t", temp_dir]
-                    + self.parts['ARGUMENTS']
-                    + [os.path.join(temp_dir, "main.tpl")],
-                    stderr=STDOUT
-                )
-            except CalledProcessError as e:
-                assert_msg = "Command %s returned exit status %d, expected %d. Output: %s" % (e.cmd, e.returncode, self.parts['EXPECTED_RETCODE'], e.output)
-                self.assertEqual(self.parts['EXPECTED_RETCODE'], e.returncode, msg=assert_msg)
-
-            self.assertMultiLineEqual(self.parts['EXPECTED'], result)
+            self._assert_process_output_as_expected([self.ast_print, "-t", temp_dir] + self.parts['ARGUMENTS'] + [os.path.join(temp_dir, "main.tpl")])
 
 
 class PHPBindingTestCase(AbstractTestCase):
@@ -123,23 +124,7 @@ class PHPBindingTestCase(AbstractTestCase):
         self.assertIn('main.php', self.parts['FILES'])
 
         with self._setup_tempdir_and_extract_files() as temp_dir:
-            try:
-                result = check_output(
-                    [
-                        self.php_binary,
-                        "-d", "extension=" + self.php_extension,
-                        "-f", os.path.join(temp_dir, "main.php")
-                    ] + self.parts['ARGUMENTS']
-                    , stderr=STDOUT
-                )
-            except CalledProcessError as e:
-                if e.returncode == 123 and e.output.strip().startswith("SKIP_TEST"):
-                    self.skipTest(e.output.strip().replace("SKIP_TEST: ", ""))
-
-                assert_msg = "Command %s returned exit status %d, expected %d. Output: %s" % (e.cmd, e.returncode, self.parts['EXPECTED_RETCODE'], e.output)
-                self.assertEqual(self.parts['EXPECTED_RETCODE'], e.returncode, msg=assert_msg)
-
-            self.assertMultiLineEqual(self.parts['EXPECTED'], result)
+            self._assert_process_output_as_expected([self.php_binary, "-d", "extension=" + self.php_extension, "-f", os.path.join(temp_dir, "main.php")] + self.parts['ARGUMENTS'])
 
 
 class JSPrecompilerTestCase(AbstractTestCase):
@@ -154,18 +139,7 @@ class JSPrecompilerTestCase(AbstractTestCase):
         self.assertIn('main.tpl', self.parts['FILES'])
 
         with self._setup_tempdir_and_extract_files() as temp_dir:
-            try:
-                result = check_output(
-                    [self.js_precompiler, "-t", temp_dir]
-                    + self.parts['ARGUMENTS']
-                    + [os.path.join(temp_dir, "main.tpl")],
-                    stderr=STDOUT
-                )
-            except CalledProcessError as e:
-                assert_msg = "Command %s returned exit status %d, expected %d. Output: %s" % (e.cmd, e.returncode, self.parts['EXPECTED_RETCODE'], e.output)
-                self.assertEqual(self.parts['EXPECTED_RETCODE'], e.returncode, msg=assert_msg)
-
-            self.assertMultiLineEqual(self.parts['EXPECTED'], result)
+            self._assert_process_output_as_expected([self.js_precompiler, "-t", temp_dir] + self.parts['ARGUMENTS'] + [os.path.join(temp_dir, "main.tpl")])
 
 
 def find_file(filenames, directory):

@@ -4,7 +4,7 @@ foo
 <?php
 if (!function_exists('xdebug_debug_zval')) {
 	echo "SKIP_TEST: No xdebug_debug_zval function present";
-	exit(123);
+	exit(0);
 }
 
 $engine = new \b2\Engine(__DIR__);

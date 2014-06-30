@@ -7,7 +7,7 @@ $template = $engine->parseTemplate("main.tpl");
 
 if (PHP_DEBUG !== 1) {
 	echo "SKIP_TEST: No PHP debug build";
-	exit(123);
+	exit(0);
 }
 
 // this will trigger a PHP warning on PHP debug builds if the string isn't NULL-terminated
