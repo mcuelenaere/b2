@@ -1,5 +1,7 @@
 #include "print_visitor.hpp"
 
+#include <map>
+
 using namespace b2;
 
 void PrintVisitor::visit(AST* ast)
@@ -97,14 +99,19 @@ void PrintVisitor::include_block(IncludeBlockAST *ast)
         this->expression(ast->scope.get());
     }
     if (ast->variableMapping.size() > 0) {
+		std::map<std::string, Expression*> sortedMapping;
+		for (auto &it : ast->variableMapping) {
+			sortedMapping[it.first] = it.second.get();
+		}
+
 		m_output << " variableMapping={";
-        for (auto iter = ast->variableMapping.begin(); iter != ast->variableMapping.end(); ++iter) {
-            if (iter != ast->variableMapping.begin()) {
+        for (auto iter = sortedMapping.begin(); iter != sortedMapping.end(); ++iter) {
+            if (iter != sortedMapping.begin()) {
 				m_output << ", ";
             }
 
 			m_output << "\"" << iter->first << " => ";
-            this->expression(iter->second.get());
+            this->expression(iter->second);
         }
 		m_output << "}";
     }

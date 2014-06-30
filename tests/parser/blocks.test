@@ -50,7 +50,7 @@
 		[RAW] "\n\n"
 		[INCLUDE_BLOCK includeName="foo"]
 		[RAW] "\n"
-		[INCLUDE_BLOCK includeName="foo" variableMapping={"foobar => {VARIABLE name="foobar"}, "bar => {STRING value="foo"}, "foo => {STRING value="bar"}}]
+		[INCLUDE_BLOCK includeName="foo" variableMapping={"bar => {STRING value="foo"}, "foo => {STRING value="bar"}, "foobar => {VARIABLE name="foobar"}}]
 		[RAW] "\n"
 		[INCLUDE_BLOCK includeName="foo" scope={VARIABLE name="foo"}]
 		[RAW] "\n"
