@@ -36,7 +36,7 @@ typedef std::unordered_map<std::string, std::unique_ptr<Expression>> StringExpre
 struct StatementsAST : TypedAST<StatementsASTType> {
     std::unique_ptr<ASTList> statements;
 
-    StatementsAST() : statements() {}
+    StatementsAST() : statements(new ASTList()) {}
     StatementsAST(ASTList* statements) : statements(statements) {}
 };
 
