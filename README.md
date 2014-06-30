@@ -2,6 +2,8 @@
 
 b² is a [jinja](http://jinja.pocoo.org/)-inspired template engine which uses [LLVM](http://llvm.org/) to generate native code.
 
+[![Build Status](https://travis-ci.org/mcuelenaere/b2.svg?branch=master)](https://travis-ci.org/mcuelenaere/b2)
+
 ## Building the code
 
 ### CMake options
