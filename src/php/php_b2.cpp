@@ -31,6 +31,7 @@ static zend_class_entry* b2_syntaxerror_class_entry;
 // internal structures
 struct Engine_object {
     zend_object zo;
+	HashTable registeredFunctions;
     std::string basePath;
 	llvm::LLVMContext llvmContext;
 	llvm::IRBuilder<> irBuilder;
@@ -44,6 +45,12 @@ struct Engine_object {
 		backend(irBuilder, bindings)
 	{
 		bindings.linkInFunctions(backend.getModule());
+		zend_hash_init(&registeredFunctions, 16, nullptr, ZVAL_PTR_DTOR, 0);
+	}
+
+	~Engine_object()
+	{
+		zend_hash_destroy(&registeredFunctions);
 	}
 };
 
@@ -175,7 +182,30 @@ static PHP_METHOD(Engine, parseTemplate)
 
 static PHP_METHOD(Engine, addFunction)
 {
-    // TODO
+    char* input = nullptr;
+    int input_len = 0;
+	zval* cb = nullptr;
+	zval* options = nullptr;
+
+    // parse parameters
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|a!", &input, &input_len, &cb, &options) == FAILURE) {
+        RETURN_NULL();
+    }
+
+	if (!zend_is_callable(cb, 0, nullptr)) {
+		zend_throw_exception(nullptr, "2nd argument passed to addFunction is not callable", 0);
+		return;
+	}
+
+	Engine_object* engine = (Engine_object*) zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (zend_hash_add(&engine->registeredFunctions, input, input_len, &cb, sizeof(zval*), nullptr) == FAILURE) {
+		zend_throw_exception(nullptr, "Couldn't add function to registeredFunctions hashtable", 0);
+		return;
+	}
+
+	// increase refcount
+	Z_ADDREF_P(cb);
 }
 
 /* {{{ b2_functions[] : Engine class */
@@ -232,7 +262,7 @@ static PHP_METHOD(Template, __construct)
     zend_throw_exception(NULL, "An object of this type cannot be created with the new operator", 0 TSRMLS_CC);
 }
 
-static void render_template(HashTable* assignments, Template_object* templ, zval* dest_buffer)
+static void render_template(HashTable* assignments, Engine_object* engn, Template_object* templ, zval* dest_buffer)
 {
     // init buffer
     template_buffer* buffer = (template_buffer*) emalloc(sizeof(template_buffer));
@@ -241,7 +271,7 @@ static void render_template(HashTable* assignments, Template_object* templ, zval
     buffer->str_length = 0;
 
     // run template
-    templ->renderFunc(assignments, buffer);
+    templ->renderFunc(assignments, buffer, &engn->registeredFunctions);
 
     // fill dest_buffer
     ZVAL_STRINGL(dest_buffer, buffer->ptr, buffer->str_length, false);
@@ -259,9 +289,11 @@ static PHP_METHOD(Template, render)
     }
 
     Template_object* templ = (Template_object*) zend_object_store_get_object(getThis() TSRMLS_CC);
+	zval* z_engn = zend_read_property(b2_template_class_entry, getThis(), "engine", strlen("engine"), false);
+	Engine_object* engn = (Engine_object*) zend_object_store_get_object(z_engn TSRMLS_CC);
 
     // run template
-    render_template(assignments, templ, return_value);
+    render_template(assignments, engn, templ, return_value);
 }
 
 static PHP_METHOD(Template, display)
@@ -273,13 +305,15 @@ static PHP_METHOD(Template, display)
     }
 
     Template_object* templ = (Template_object*) zend_object_store_get_object(getThis() TSRMLS_CC);
+	zval* z_engn = zend_read_property(b2_template_class_entry, getThis(), "engine", strlen("engine"), false);
+	Engine_object* engn = (Engine_object*) zend_object_store_get_object(z_engn TSRMLS_CC);
 
     // allocate buffer
     zval* buf;
     MAKE_STD_ZVAL(buf);
 
     // render template
-    render_template(assignments, templ, buf);
+    render_template(assignments, engn, templ, buf);
 
     // write buffer to stdout and destroy it
     PHPWRITE(Z_STRVAL_P(buf), Z_STRLEN_P(buf));

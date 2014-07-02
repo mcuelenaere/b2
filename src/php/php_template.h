@@ -16,7 +16,7 @@ struct template_buffer {
 };
 #define BUFFER_CHUNK_SIZE 256
 
-typedef void (*template_fn)(HashTable*, struct template_buffer*);
+typedef void (*template_fn)(HashTable*, struct template_buffer*, HashTable*);
 
 #ifdef __cplusplus
 }

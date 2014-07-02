@@ -298,7 +298,7 @@ Value* PHPBindings::createVariableLookup(const char* variableName)
     auto function = m_irBuilder.GetInsertBlock()->getParent();
 
     Value* lookupVariableArgs[] = {
-        /*map*/       getArgumentAtIdx(function, 0), // TODO: use "assignments" instead of 1
+        /*map*/       getArgumentAtIdx(function, 0), // TODO: use "assignments" instead of 0
         /*key*/       m_irBuilder.CreateGlobalStringPtr(variableName),
         /*keyLength*/ m_irBuilder.getInt32(strlen(variableName))
     };
@@ -312,6 +312,8 @@ Value* PHPBindings::createVariableLookup(const char* variableName)
 
 llvm::Value* PHPBindings::createMethodCall(const char* methodName, llvm::ArrayRef<llvm::Value*> arguments)
 {
+    auto templateFn = m_irBuilder.GetInsertBlock()->getParent();
+
     auto variantPtrType = getVariantType()->getPointerTo();
     llvm::Value* argumentsValue;
     std::vector<llvm::Value*> valuesToDestroy;
@@ -333,6 +335,7 @@ llvm::Value* PHPBindings::createMethodCall(const char* methodName, llvm::ArrayRe
     }
 
     Value* methodCallArgs[] = {
+		/*func_table*/         getArgumentAtIdx(templateFn, 2), // TODO: use "functions" instead of 2
         /*functionName*/       m_irBuilder.CreateGlobalStringPtr(methodName),
         /*functionNameLength*/ m_irBuilder.getInt32(strlen(methodName)),
         /*param_count*/        m_irBuilder.getInt32(arguments.size()),
@@ -340,9 +343,15 @@ llvm::Value* PHPBindings::createMethodCall(const char* methodName, llvm::ArrayRe
     };
     auto returnValue = m_irBuilder.CreateCall(findFunction("do_method_call"), methodCallArgs);
 
+	// init variable refcount
+	m_variablesRefCount[returnValue] = 1;
+
     for (auto value : valuesToDestroy) {
         variableGoesOutOfScope(value);
     }
+
+	auto callFailed = m_irBuilder.CreateICmpNE(returnValue, ConstantPointerNull::get(static_cast<PointerType*>(returnValue->getType())));
+	createRetVoidIfCallFails(callFailed);
 
     return returnValue;
 }

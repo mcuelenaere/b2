@@ -10,7 +10,7 @@
 
 #define ALWAYS_INLINE __attribute__((always_inline))
 
-void php_prototype(HashTable* assignments, struct template_buffer* buffer)
+void php_prototype(HashTable* assignments, struct template_buffer* buffer, HashTable* functions)
 {
 }
 
@@ -210,21 +210,21 @@ zval* get_attribute(zval* map, const char* key, uint keyLength)
     return get_value_from_hashtable(ht, key, keyLength);
 }
 
-zval* do_method_call(const char* functionName, uint functionNameLength, zend_uint param_count, zval* params[])
+zval* do_method_call(HashTable* func_table, const char* functionName, uint functionNameLength, zend_uint param_count, zval* params[])
 {
     zval *return_value;
+	ALLOC_INIT_ZVAL(return_value);
 
-    zval z_function_name;
-    INIT_ZVAL(z_function_name);
-    ZVAL_STRINGL(&z_function_name, functionName, functionNameLength, false);
+    zval **z_function;
+	if (zend_hash_find(func_table, functionName, functionNameLength, (void**) &z_function) != SUCCESS) {
+		zend_throw_exception_ex(NULL, 0, "No such function: %s", functionName);
+		return NULL;
+	}
 
-    if (call_user_function(CG(function_table), NULL, &z_function_name, return_value, param_count, params TSRMLS_CC) != SUCCESS) {
-        ALLOC_INIT_ZVAL(return_value);
+    if (call_user_function(EG(function_table), NULL, *z_function, return_value, param_count, params TSRMLS_CC) != SUCCESS) {
+		return NULL;
     }
 
-    zval_dtor(&z_function_name);
-
-    // we assume the refcount of the returned value is already ok
     return return_value;
 }
 

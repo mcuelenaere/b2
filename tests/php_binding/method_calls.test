@@ -1,0 +1,18 @@
+--TEMPLATE--
+{{ upper('Hello!') }}
+A{{ space_repeat(3) }}B
+--FILE[main.php]--
+<?php
+$engine = new \b2\Engine(__DIR__);
+$engine->addFunction('upper', 'strtoupper');
+$engine->addFunction('space_repeat', function ($length) {
+	return str_repeat(' ', $length);
+});
+
+$template = $engine->parseTemplate("main.tpl");
+
+$template->display([]);
+
+--EXPECTED--
+HELLO!
+A   B

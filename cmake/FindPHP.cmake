@@ -42,6 +42,7 @@ if(APPLE)
     __estrdup
     __object_init_ex
     __zval_ptr_dtor
+    __zval_ptr_dtor_wrapper
     _display_ini_entries
     _object_properties_init
     _php_info_print_table_end
@@ -64,6 +65,11 @@ if(APPLE)
     _zend_strndup
     _zend_throw_exception
     _zend_update_property
+    __zend_hash_init
+    _zend_hash_destroy
+    __zend_hash_add_or_update
+    _zend_is_callable
+    _zend_read_property
     )
     set(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS},-U,${symbol}")
   endforeach()
