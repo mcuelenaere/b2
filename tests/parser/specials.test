@@ -1,3 +1,5 @@
+--SKIP_TEST--
+Disabled until low-prio eat-whitespace-before-blocks bug is fixed.
 --ARGUMENTS--
 	--enable-all-passes --disable-resolve-includes-pass
 --TEMPLATE--

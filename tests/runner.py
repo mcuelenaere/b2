@@ -125,6 +125,9 @@ class ParserTestCase(AbstractTestCase):
         self.assertIn('EXPECTED', self.parts)
         self.assertIn('main.tpl', self.parts['FILES'])
 
+        if 'SKIP_TEST' in self.parts:
+            self.skipTest(self.parts['SKIP_TEST'].strip())
+
         with self._setup_tempdir_and_extract_files() as temp_dir:
             self._assert_process_output_as_expected([self.ast_print, "-t", temp_dir] + self.parts['ARGUMENTS'] + [os.path.join(temp_dir, "main.tpl")])
 
